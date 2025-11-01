@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>To-Do</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/style.css">
     <script
     src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
     integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
@@ -15,103 +15,49 @@
 
 <body>
     <div class="heading-container">
-        <img src="to-do img.webp" alt="image description">
+        <div class="logo-icon">✓</div>
         <h1>To-Do List</h1>
+        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
+        <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
     
     <div class="heading-container">
-        <input type="text" id="taskInput" placeholder="">
+        <input type="text" id="taskInput" placeholder="What needs to be done?">
+        <input type="date" id="date"/>
+        <select id="priority">
+            <option value="low">Low Priority</option>
+            <option value="medium" selected>Medium Priority</option>
+            <option value="high">High Priority</option>
+        </select>
+        <select id="category">
+            <option value="personal">Personal</option>
+            <option value="work">Work</option>
+            <option value="urgent">Urgent</option>
+        </select>
         <button onclick="addTask()">Add</button>
-        <input type="date" id="date"/>  
+    </div>
+
+    <div class="task-controls">
+        <div class="task-counter">
+            <span id="taskCounter">0 tasks</span>
+        </div>
+        <input type="text" id="searchInput" placeholder="🔍 Search tasks..." onkeyup="filterTasks()">
+        <select id="filterCategory" onchange="filterTasks()">
+            <option value="all">All Categories</option>
+            <option value="personal">Personal</option>
+            <option value="work">Work</option>
+            <option value="urgent">Urgent</option>
+        </select>
     </div>
 
     <ul id="taskList">
     </ul>
 
-
+    <script src="js/auth.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/tasks.js"></script>
     <script>
         $('[data-toggle="datepicker"]').datepicker();
-        function addTask() {
-            const taskInput = document.getElementById('taskInput');
-            const taskList = document.getElementById('taskList');
-            const taskdate = document.getElementById('date');
-
-            if (taskInput.value.trim() !== "") {
-                const listItem = document.createElement('li');
-
-                const checkbox = document.createElement('input');
-                checkbox.type = "checkbox";
-                checkbox.addEventListener('change', function () {
-                    if (this.checked) 
-                    {
-                        listItem.style.textDecoration = "";
-                    } else 
-                    {
-                        listItem.style.textDecoration = "none";
-                    }
-                });
-
-                const taskText = document.createTextNode(taskInput.value);
-                const taskDate = document.createTextNode(taskdate.value);
-
-                listItem.appendChild(taskDate);
-                listItem.appendChild(checkbox);
-                listItem.appendChild(taskText);
-                taskList.appendChild(listItem);
-
-                taskInput.value = "";
-            } else {
-                alert("Please enter a task.");
-            }
-
-            saveTasks()
-        }
-
-        function saveTasks() {
-            const taskList = document.getElementById('taskList');
-            const tasks = [];
-            taskList.querySelectorAll('li').forEach(listItem => {
-                const checkbox = listItem.querySelector('input[type="checkbox"]');
-                tasks.push({ text: listItem.textContent, completed: checkbox.checked });
-            });
-            localStorage.setItem('tasks', JSON.stringify(tasks));
-        }
-
-        document.addEventListener('DOMContentLoaded', loadTasks)
-
-        function loadTasks() {
-            const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
-            const taskList = document.getElementById('taskList');
-            savedTasks.forEach(task => {
-                console.log(task.text, task.completed)
-                if (task.completed == true) return
-
-                const listItem = createTaskElement(task.text, task.completed);
-                taskList.appendChild(listItem);
-            });
-        }
-
-        function createTaskElement(taskText, completed = false) {
-            const listItem = document.createElement('li');
-
-            const checkbox = document.createElement('input');
-            checkbox.type = "checkbox";
-            checkbox.checked = completed; // Apply saved state
-            checkbox.addEventListener('change', function () {
-                listItem.style.textDecoration = this.checked ? "" : "none";
-                saveTasks(); // Save changes to localStorage
-            });
-
-            if (completed) {
-                listItem.style.textDecoration = "";
-            }
-
-            const taskTextNode = document.createTextNode(taskText);
-            listItem.appendChild(checkbox);
-            listItem.appendChild(taskTextNode);
-            return listItem;
-        }
-
     </script>
 
 </body>
