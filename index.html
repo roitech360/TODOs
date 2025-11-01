@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do</title>
+    <link rel="stylesheet" href="style.css">
+    <script
+  src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
+  integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
+  crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+</head>
+
+<body>
+    <div class="heading-container">
+        <img src="to-do img.webp" alt="image description">
+        <h1>To-Do List</h1>
+    </div>
+    
+    <div class="heading-container">
+        <input type="text" id="taskInput" placeholder="">
+        <button onclick="addTask()">Add</button>
+        <input type="date" id="date"/>  
+    </div>
+
+    <ul id="taskList">
+    </ul>
+
+
+    <script>
+        $('[data-toggle="datepicker"]').datepicker();
+        function addTask() {
+            const taskInput = document.getElementById('taskInput');
+            const taskList = document.getElementById('taskList');
+            const taskdate = document.getElementById('date');
+
+            if (taskInput.value.trim() !== "") {
+                const listItem = document.createElement('li');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = "checkbox";
+                checkbox.addEventListener('change', function () {
+                    if (this.checked) 
+                    {
+                        listItem.style.textDecoration = "";
+                    } else 
+                    {
+                        listItem.style.textDecoration = "none";
+                    }
+                });
+
+                const taskText = document.createTextNode(taskInput.value);
+                const taskDate = document.createTextNode(taskdate.value);
+
+                listItem.appendChild(taskDate);
+                listItem.appendChild(checkbox);
+                listItem.appendChild(taskText);
+                taskList.appendChild(listItem);
+
+                taskInput.value = "";
+            } else {
+                alert("Please enter a task.");
+            }
+
+            saveTasks()
+        }
+
+        function saveTasks() {
+            const taskList = document.getElementById('taskList');
+            const tasks = [];
+            taskList.querySelectorAll('li').forEach(listItem => {
+                const checkbox = listItem.querySelector('input[type="checkbox"]');
+                tasks.push({ text: listItem.textContent, completed: checkbox.checked });
+            });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        document.addEventListener('DOMContentLoaded', loadTasks)
+
+        function loadTasks() {
+            const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            const taskList = document.getElementById('taskList');
+            savedTasks.forEach(task => {
+                console.log(task.text, task.completed)
+                if (task.completed == true) return
+
+                const listItem = createTaskElement(task.text, task.completed);
+                taskList.appendChild(listItem);
+            });
+        }
+
+        function createTaskElement(taskText, completed = false) {
+            const listItem = document.createElement('li');
+
+            const checkbox = document.createElement('input');
+            checkbox.type = "checkbox";
+            checkbox.checked = completed; // Apply saved state
+            checkbox.addEventListener('change', function () {
+                listItem.style.textDecoration = this.checked ? "" : "none";
+                saveTasks(); // Save changes to localStorage
+            });
+
+            if (completed) {
+                listItem.style.textDecoration = "";
+            }
+
+            const taskTextNode = document.createTextNode(taskText);
+            listItem.appendChild(checkbox);
+            listItem.appendChild(taskTextNode);
+            return listItem;
+        }
+
+    </script>
+
+</body>
+
+</html>
