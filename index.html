@@ -23,16 +23,28 @@
     
     <div class="heading-container">
         <input type="text" id="taskInput" placeholder="What needs to be done?">
-        <input type="date" id="date"/>
+        <textarea id="taskNotes" placeholder="Add notes or description (optional)" rows="2"></textarea>
+        <div class="date-input-wrapper">
+            <span class="date-icon">📅</span>
+            <input type="date" id="date" placeholder="Due date"/>
+        </div>
         <select id="priority">
-            <option value="low">Low Priority</option>
-            <option value="medium" selected>Medium Priority</option>
-            <option value="high">High Priority</option>
+            <option value="low">🟢 Low Priority</option>
+            <option value="medium" selected>🟡 Medium Priority</option>
+            <option value="high">🔴 High Priority</option>
         </select>
         <select id="category">
-            <option value="personal">Personal</option>
-            <option value="work">Work</option>
-            <option value="urgent">Urgent</option>
+            <option value="personal">💭 Personal</option>
+            <option value="work">💼 Work</option>
+            <option value="urgent">⚠️ Urgent</option>
+            <option value="custom">✏️ Custom...</option>
+        </select>
+        <input type="text" id="customCategory" placeholder="Enter custom category" style="display: none;">
+        <select id="recurrence">
+            <option value="none">No Repeat</option>
+            <option value="daily">🔄 Daily</option>
+            <option value="weekly">📅 Weekly</option>
+            <option value="monthly">📆 Monthly</option>
         </select>
         <button onclick="addTask()">Add</button>
     </div>

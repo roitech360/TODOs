@@ -6,11 +6,23 @@ async function addTask() {
     const taskInput = document.getElementById('taskInput');
     const taskdate = document.getElementById('date');
     const priority = document.getElementById('priority').value;
-    const category = document.getElementById('category').value;
+        let category = document.getElementById('category').value;
+    const customCategory = document.getElementById('customCategory');
+    const notes = document.getElementById('taskNotes').value;
+    const recurrence = document.getElementById('recurrence').value;
 
     if (taskInput.value.trim() === "") {
         alert("Please enter a task.");
         return;
+    }
+
+    // Use custom category if selected
+    if (category === 'custom') {
+        if (customCategory.value.trim() === '') {
+            alert("Please enter a custom category.");
+            return;
+        }
+        category = customCategory.value.trim().toLowerCase();
     }
 
     try {
@@ -25,7 +37,9 @@ async function addTask() {
                 date: taskdate.value || null,
                 completed: false,
                 priority: priority,
-                category: category
+                category: category,
+                notes: notes || null,
+                recurrence: recurrence
             })
         });
 
@@ -38,6 +52,10 @@ async function addTask() {
             taskdate.value = "";
             document.getElementById('priority').value = "medium";
             document.getElementById('category').value = "personal";
+            document.getElementById('taskNotes').value = "";
+            document.getElementById('recurrence').value = "none";
+            document.getElementById('customCategory').value = "";
+            document.getElementById('customCategory').style.display = "none";
         } else {
             alert('Failed to add task');
         }
@@ -126,6 +144,7 @@ function renderTasks() {
     });
 
     updateTaskCounter();
+    updateCategoryFilter();
 }
 
 function updateTaskCounter() {
@@ -135,7 +154,54 @@ function updateTaskCounter() {
     counter.textContent = `${completed}/${total} tasks completed`;
 }
 
+function updateCategoryFilter() {
+    const filterCategory = document.getElementById('filterCategory');
+    const currentValue = filterCategory.value;
+    
+    // Get all unique categories from tasks
+    const categories = new Set(['all', 'personal', 'work', 'urgent']);
+    allTasks.forEach(task => {
+        if (task.category && !['personal', 'work', 'urgent'].includes(task.category)) {
+            categories.add(task.category);
+        }
+    });
+    
+    // Clear and rebuild filter options
+    filterCategory.innerHTML = '';
+    categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat;
+        if (cat === 'all') {
+            option.textContent = 'All Categories';
+        } else {
+            option.textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+        }
+        filterCategory.appendChild(option);
+    });
+    
+    // Restore previous selection if it still exists
+    if ([...categories].includes(currentValue)) {
+        filterCategory.value = currentValue;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', loadTasks);
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle category dropdown change
+    const categorySelect = document.getElementById('category');
+    const customCategoryInput = document.getElementById('customCategory');
+    
+    categorySelect.addEventListener('change', function() {
+        if (this.value === 'custom') {
+            customCategoryInput.style.display = 'block';
+            customCategoryInput.focus();
+        } else {
+            customCategoryInput.style.display = 'none';
+            customCategoryInput.value = '';
+        }
+    });
+});
 
 async function loadTasks() {
     try {
@@ -160,6 +226,15 @@ function createTaskElement(task) {
     const listItem = document.createElement('li');
     listItem.dataset.taskId = task.id;
     listItem.dataset.priority = task.priority || 'medium';
+    
+    // Enable drag and drop
+    listItem.draggable = true;
+    listItem.addEventListener('dragstart', handleDragStart);
+    listItem.addEventListener('dragover', handleDragOver);
+    listItem.addEventListener('dragenter', handleDragEnter);
+    listItem.addEventListener('dragleave', handleDragLeave);
+    listItem.addEventListener('drop', handleDrop);
+    listItem.addEventListener('dragend', handleDragEnd);
 
     // Check if task is overdue
     if (task.date && !task.completed) {
@@ -175,7 +250,12 @@ function createTaskElement(task) {
     checkbox.type = "checkbox";
     checkbox.checked = task.completed;
     checkbox.addEventListener('change', async function () {
-        await updateTask(task.id, { completed: this.checked });
+        if (this.checked && task.recurrence && task.recurrence !== 'none') {
+            // Handle recurring task completion
+            await handleRecurringTaskCompletion(task);
+        } else {
+            await updateTask(task.id, { completed: this.checked });
+        }
     });
 
     listItem.appendChild(checkbox);
@@ -192,6 +272,32 @@ function createTaskElement(task) {
         taskText.style.opacity = '0.6';
     }
 
+    taskContent.appendChild(taskText);
+
+    // Add notes if they exist
+    if (task.notes) {
+        const notesToggle = document.createElement('span');
+        notesToggle.className = 'task-notes-toggle';
+        notesToggle.textContent = '📝 View notes';
+        notesToggle.onclick = function() {
+            const notesDiv = this.nextElementSibling;
+            if (notesDiv.style.display === 'none' || !notesDiv.style.display) {
+                notesDiv.style.display = 'block';
+                this.textContent = '📝 Hide notes';
+            } else {
+                notesDiv.style.display = 'none';
+                this.textContent = '📝 View notes';
+            }
+        };
+        taskContent.appendChild(notesToggle);
+
+        const notesDiv = document.createElement('div');
+        notesDiv.className = 'task-notes';
+        notesDiv.textContent = task.notes;
+        notesDiv.style.display = 'none';
+        taskContent.appendChild(notesDiv);
+    }
+
     const taskMeta = document.createElement('div');
     taskMeta.className = 'task-meta';
 
@@ -203,8 +309,14 @@ function createTaskElement(task) {
     }
 
     const categorySpan = document.createElement('span');
-    categorySpan.className = `task-category ${task.category || 'personal'}`;
-    categorySpan.textContent = task.category || 'personal';
+    const category = task.category || 'personal';
+    
+    // Check if it's a custom category (not one of the default ones)
+    const defaultCategories = ['personal', 'work', 'urgent'];
+    const isCustomCategory = !defaultCategories.includes(category);
+    
+    categorySpan.className = isCustomCategory ? 'task-category custom' : `task-category ${category}`;
+    categorySpan.textContent = category;
     taskMeta.appendChild(categorySpan);
 
     const prioritySpan = document.createElement('span');
@@ -212,6 +324,15 @@ function createTaskElement(task) {
     const priorityIcons = { high: '🔴', medium: '🟡', low: '🟢' };
     prioritySpan.textContent = `${priorityIcons[task.priority || 'medium']} ${task.priority || 'medium'}`;
     taskMeta.appendChild(prioritySpan);
+
+    // Add recurrence badge if task is recurring
+    if (task.recurrence && task.recurrence !== 'none') {
+        const recurrenceSpan = document.createElement('span');
+        recurrenceSpan.className = 'task-recurrence';
+        const recurrenceIcons = { daily: '🔄', weekly: '📅', monthly: '📆' };
+        recurrenceSpan.textContent = `${recurrenceIcons[task.recurrence]} ${task.recurrence}`;
+        taskMeta.appendChild(recurrenceSpan);
+    }
 
     taskContent.appendChild(taskText);
     taskContent.appendChild(taskMeta);
@@ -240,4 +361,180 @@ function createTaskElement(task) {
     listItem.appendChild(taskActions);
 
     return listItem;
+}
+
+// Drag and Drop functionality
+let draggedElement = null;
+
+function handleDragStart(e) {
+    draggedElement = this;
+    this.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/html', this.innerHTML);
+    
+    // Delay to prevent immediate style application
+    setTimeout(() => {
+        this.style.display = 'flex';
+    }, 0);
+}
+
+function handleDragEnter(e) {
+    if (this !== draggedElement) {
+        this.classList.add('drag-over');
+    }
+}
+
+function handleDragLeave(e) {
+    this.classList.remove('drag-over');
+}
+
+function handleDragOver(e) {
+    e.preventDefault();
+    
+    if (this === draggedElement) {
+        return;
+    }
+    
+    const container = document.getElementById('taskList');
+    const afterElement = getDragAfterElement(container, e.clientY);
+    
+    if (afterElement == null) {
+        container.appendChild(draggedElement);
+    } else if (afterElement !== draggedElement) {
+        container.insertBefore(draggedElement, afterElement);
+    }
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    this.classList.remove('drag-over');
+    
+    // Update task order after drop
+    updateTaskOrder();
+}
+
+function handleDragEnd(e) {
+    this.classList.remove('dragging');
+    
+    // Remove any visual indicators from all elements
+    const items = document.querySelectorAll('#taskList li');
+    items.forEach(item => {
+        item.classList.remove('drag-over');
+    });
+    
+    draggedElement = null;
+}
+
+function getDragAfterElement(container, y) {
+    const draggableElements = [...container.querySelectorAll('li:not(.dragging)')];
+    
+    return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        
+        if (offset < 0 && offset > closest.offset) {
+            return { offset: offset, element: child };
+        } else {
+            return closest;
+        }
+    }, { offset: Number.NEGATIVE_INFINITY }).element;
+}
+
+async function updateTaskOrder() {
+    const taskList = document.getElementById('taskList');
+    const taskElements = taskList.querySelectorAll('li');
+    const newOrder = [];
+    
+    taskElements.forEach((element, index) => {
+        const taskId = parseInt(element.dataset.taskId);
+        newOrder.push(taskId);
+    });
+    
+    // Update the order in allTasks array
+    allTasks.sort((a, b) => {
+        return newOrder.indexOf(a.id) - newOrder.indexOf(b.id);
+    });
+    
+    // Save order to server
+    try {
+        await fetch(`${API_URL}/tasks/reorder`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify({ order: newOrder })
+        });
+    } catch (error) {
+        console.error('Failed to save task order');
+    }
+}
+
+// Handle recurring task completion
+async function handleRecurringTaskCompletion(task) {
+    if (!task.date) {
+        await updateTask(task.id, { completed: true });
+        return;
+    }
+
+    const currentDate = new Date(task.date);
+    let nextDate;
+
+    switch (task.recurrence) {
+        case 'daily':
+            nextDate = new Date(currentDate);
+            nextDate.setDate(nextDate.getDate() + 1);
+            break;
+        case 'weekly':
+            nextDate = new Date(currentDate);
+            nextDate.setDate(nextDate.getDate() + 7);
+            break;
+        case 'monthly':
+            nextDate = new Date(currentDate);
+            nextDate.setMonth(nextDate.getMonth() + 1);
+            break;
+        default:
+            await updateTask(task.id, { completed: true });
+            return;
+    }
+
+    // Format the next date
+    const formattedNextDate = nextDate.toISOString().split('T')[0];
+
+    try {
+        // Create a new task with the next occurrence date
+        const response = await fetch(`${API_URL}/tasks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('authToken')}`
+            },
+            body: JSON.stringify({
+                text: task.text,
+                date: formattedNextDate,
+                completed: false,
+                priority: task.priority,
+                category: task.category,
+                notes: task.notes,
+                recurrence: task.recurrence
+            })
+        });
+
+        if (response.ok) {
+            const newTask = await response.json();
+            allTasks.push(newTask);
+            
+            // Mark the current task as completed
+            await updateTask(task.id, { completed: true });
+            
+            // Show notification
+            alert(`Task completed! Next occurrence scheduled for ${formattedNextDate}`);
+        } else {
+            alert('Failed to create next occurrence');
+        }
+    } catch (error) {
+        alert('Error creating recurring task');
+    }
 }

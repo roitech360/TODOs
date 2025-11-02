@@ -132,7 +132,7 @@ app.get('/api/tasks', authenticateToken, (req, res) => {
 // Add a new task
 app.post('/api/tasks', authenticateToken, (req, res) => {
     try {
-        const { text, date, completed, priority, category } = req.body;
+        const { text, date, completed, priority, category, notes, recurrence } = req.body;
 
         if (!text) {
             return res.status(400).json({ error: 'Task text required' });
@@ -149,7 +149,9 @@ app.post('/api/tasks', authenticateToken, (req, res) => {
             date: date || null,
             completed: completed || false,
             priority: priority || 'medium',
-            category: category || 'personal'
+            category: category || 'personal',
+            notes: notes || null,
+            recurrence: recurrence || 'none'
         };
 
         tasks[req.user.username].push(newTask);
@@ -165,7 +167,7 @@ app.post('/api/tasks', authenticateToken, (req, res) => {
 app.put('/api/tasks/:id', authenticateToken, (req, res) => {
     try {
         const taskId = parseInt(req.params.id);
-        const { text, date, completed, priority, category } = req.body;
+        const { text, date, completed, priority, category, notes, recurrence } = req.body;
 
         const tasks = readTasks();
         const userTasks = tasks[req.user.username] || [];
@@ -182,7 +184,9 @@ app.put('/api/tasks/:id', authenticateToken, (req, res) => {
             date: date !== undefined ? date : userTasks[taskIndex].date,
             completed: completed !== undefined ? completed : userTasks[taskIndex].completed,
             priority: priority !== undefined ? priority : userTasks[taskIndex].priority,
-            category: category !== undefined ? category : userTasks[taskIndex].category
+            category: category !== undefined ? category : userTasks[taskIndex].category,
+            notes: notes !== undefined ? notes : userTasks[taskIndex].notes,
+            recurrence: recurrence !== undefined ? recurrence : userTasks[taskIndex].recurrence
         };
 
         tasks[req.user.username] = userTasks;
@@ -212,6 +216,28 @@ app.delete('/api/tasks/:id', authenticateToken, (req, res) => {
         writeTasks(tasks);
 
         res.json({ message: 'Task deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: 'Server error' });
+    }
+});
+
+// Reorder tasks
+app.post('/api/tasks/reorder', authenticateToken, (req, res) => {
+    try {
+        const { order } = req.body;
+
+        const tasks = readTasks();
+        const userTasks = tasks[req.user.username] || [];
+
+        // Reorder tasks based on the provided order array
+        const reorderedTasks = order.map(id => {
+            return userTasks.find(task => task.id === id);
+        }).filter(task => task !== undefined);
+
+        tasks[req.user.username] = reorderedTasks;
+        writeTasks(tasks);
+
+        res.json({ message: 'Task order updated successfully' });
     } catch (error) {
         res.status(500).json({ error: 'Server error' });
     }

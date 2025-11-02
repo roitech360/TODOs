@@ -169,7 +169,8 @@ body {
 }
 
 select {
-    padding: 10px 15px;
+    padding: 12px 18px;
+    padding-right: 40px;
     font-size: 15px;
     border: 2px solid var(--border-color);
     border-radius: 8px;
@@ -178,11 +179,35 @@ select {
     color: var(--text-color);
     cursor: pointer;
     transition: all 0.3s ease;
+    font-family: inherit;
+    font-weight: 500;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%230d9488' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+}
+
+body.dark-mode select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2314b8a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+}
+
+select:hover {
+    border-color: #0d9488;
+    background-color: rgba(13, 148, 136, 0.02);
 }
 
 select:focus {
     border-color: #0d9488;
     box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+select option {
+    padding: 10px;
+    background: var(--card-bg);
+    color: var(--text-color);
 }
 
 input[type="text"] {
@@ -198,9 +223,92 @@ input[type="text"] {
     transition: all 0.3s ease;
 }
 
+textarea {
+    width: 100%;
+    min-width: 250px;
+    padding: 12px 18px;
+    font-size: 14px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    outline: none;
+    background: var(--card-bg);
+    color: var(--text-color);
+    resize: vertical;
+    font-family: inherit;
+    transition: all 0.3s ease;
+}
+
+textarea:focus {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
 input[type="text"]:focus {
     border-color: #0d9488;
     box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+/* Custom Category Input */
+#customCategory {
+    min-width: 200px;
+    padding: 12px 18px;
+    font-size: 15px;
+    border: 2px solid #0d9488;
+    border-radius: 8px;
+    outline: none;
+    background: var(--card-bg);
+    color: var(--text-color);
+    transition: all 0.3s ease;
+    animation: slideIn 0.3s ease;
+}
+
+#customCategory:focus {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+#customCategory::placeholder {
+    color: var(--text-light);
+    font-style: italic;
+}
+
+/* Date Input Wrapper */
+.date-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    padding: 0 12px;
+    transition: all 0.3s ease;
+}
+
+.date-input-wrapper:hover {
+    border-color: rgba(13, 148, 136, 0.5);
+}
+
+.date-input-wrapper:focus-within {
+    border-color: #0d9488;
+    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+.date-icon {
+    font-size: 18px;
+    margin-right: 8px;
+    user-select: none;
+    pointer-events: none;
+}
+
+.date-input-wrapper input[type="date"] {
+    border: none;
+    padding: 12px 6px;
+    background: transparent;
+    flex: 1;
+}
+
+.date-input-wrapper input[type="date"]:focus {
+    box-shadow: none;
 }
 
 input[type="date"] {
@@ -213,11 +321,74 @@ input[type="date"] {
     color: var(--text-color);
     cursor: pointer;
     transition: all 0.3s ease;
+    font-family: inherit;
+    position: relative;
 }
 
 input[type="date"]:focus {
     border-color: #0d9488;
     box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+}
+
+/* Modern Calendar Styling */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    border-radius: 4px;
+    margin-left: 8px;
+    opacity: 0.7;
+    transition: all 0.2s ease;
+    padding: 4px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+    background: rgba(13, 148, 136, 0.1);
+    transform: scale(1.1);
+}
+
+input[type="date"]::-webkit-datetime-edit {
+    padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+    padding: 0;
+}
+
+input[type="date"]::-webkit-datetime-edit-text {
+    color: var(--text-light);
+    padding: 0 2px;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-day-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+    color: var(--text-color);
+    font-weight: 500;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: background 0.2s ease;
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field:hover,
+input[type="date"]::-webkit-datetime-edit-day-field:hover,
+input[type="date"]::-webkit-datetime-edit-year-field:hover {
+    background: rgba(13, 148, 136, 0.1);
+}
+
+input[type="date"]::-webkit-datetime-edit-month-field:focus,
+input[type="date"]::-webkit-datetime-edit-day-field:focus,
+input[type="date"]::-webkit-datetime-edit-year-field:focus {
+    background: rgba(13, 148, 136, 0.2);
+    outline: none;
+}
+
+/* Style the calendar icon with teal color */
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: brightness(0) saturate(100%) invert(48%) sepia(79%) saturate(434%) hue-rotate(126deg) brightness(95%) contrast(92%);
+}
+
+body.dark-mode input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: brightness(0) saturate(100%) invert(69%) sepia(56%) saturate(449%) hue-rotate(126deg) brightness(96%) contrast(89%);
 }
 
 button {
@@ -260,10 +431,31 @@ li {
     gap: 15px;
     border-radius: 10px;
     box-shadow: 0 4px 10px var(--shadow);
-    transition: all 0.3s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     animation: slideIn 0.3s ease;
     position: relative;
     border-left: 4px solid transparent;
+    cursor: grab;
+}
+
+li:active {
+    cursor: grabbing;
+}
+
+li:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px var(--shadow);
+}
+
+li.dragging {
+    opacity: 0.5;
+    transform: rotate(2deg) scale(1.02);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    cursor: grabbing;
+}
+
+li.drag-over {
+    border-top: 3px solid #14b8a6;
 }
 
 li[data-priority="high"] {
@@ -308,6 +500,31 @@ li:hover .task-actions {
     word-break: break-word;
 }
 
+.task-notes {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-top: 5px;
+    padding: 8px 12px;
+    background: var(--border-color);
+    border-radius: 6px;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.task-notes-toggle {
+    color: #0d9488;
+    cursor: pointer;
+    font-size: 13px;
+    margin-top: 5px;
+    text-decoration: underline;
+    display: inline-block;
+}
+
+.task-notes-toggle:hover {
+    color: #0a7a6f;
+}
+
 .task-meta {
     display: flex;
     gap: 10px;
@@ -316,10 +533,21 @@ li:hover .task-actions {
     color: var(--text-light);
 }
 
-.task-date, .task-category, .task-priority {
+.task-date, .task-category, .task-priority, .task-recurrence {
     padding: 3px 8px;
     border-radius: 4px;
     background: var(--border-color);
+}
+
+.task-recurrence {
+    background: #e0e7ff;
+    color: #4338ca;
+    font-weight: 500;
+}
+
+body.dark-mode .task-recurrence {
+    background: #3730a3;
+    color: #c7d2fe;
 }
 
 .task-category.work {
@@ -337,6 +565,13 @@ li:hover .task-actions {
     color: #9a3412;
 }
 
+.task-category.custom {
+    background: linear-gradient(135deg, #a78bfa 0%, #c084fc 100%);
+    color: white;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
 body.dark-mode .task-category.work {
     background: #1e3a8a;
     color: #93c5fd;
@@ -350,6 +585,11 @@ body.dark-mode .task-category.personal {
 body.dark-mode .task-category.urgent {
     background: #7c2d12;
     color: #fed7aa;
+}
+
+body.dark-mode .task-category.custom {
+    background: linear-gradient(135deg, #7c3aed 0%, #a855f7 100%);
+    color: white;
 }
 
 .task-actions {
