@@ -24,7 +24,7 @@
       "id": 1762066006859,
       "text": "code ",
       "date": "2025-11-02",
-      "completed": false,
+      "completed": true,
       "priority": "medium",
       "category": "work"
     },
@@ -32,7 +32,7 @@
       "id": 1762065986065,
       "text": "gym",
       "date": "2025-11-02",
-      "completed": false,
+      "completed": true,
       "priority": "high",
       "category": "personal"
     }
@@ -42,7 +42,7 @@
       "id": 1762088877840,
       "text": "cook",
       "date": "2025-11-03",
-      "completed": false,
+      "completed": true,
       "priority": "high",
       "category": "work",
       "notes": "need to be done today",

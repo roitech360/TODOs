@@ -1,6 +1,7 @@
-// Task management functions
+// Task management functions - Updated Nov 3, 2025
 const API_URL = 'http://localhost:3000/api';
 let allTasks = [];
+let showCompleted = false; // Toggle state for showing/hiding completed tasks
 
 async function addTask() {
     const taskInput = document.getElementById('taskInput');
@@ -80,7 +81,14 @@ async function updateTask(taskId, updates) {
             const taskIndex = allTasks.findIndex(t => t.id === taskId);
             if (taskIndex !== -1) {
                 allTasks[taskIndex] = { ...allTasks[taskIndex], ...updates };
-                renderTasks();
+                
+                // Only update the specific task element instead of re-rendering everything
+                if (updates.completed !== undefined) {
+                    updateTaskElementState(taskId, updates.completed);
+                } else {
+                    // For other updates (like text changes), re-render
+                    renderTasks();
+                }
             }
         } else {
             alert('Failed to update task');
@@ -88,6 +96,54 @@ async function updateTask(taskId, updates) {
     } catch (error) {
         alert('Error connecting to server');
     }
+}
+
+function updateTaskElementState(taskId, completed) {
+    const listItem = document.querySelector(`li[data-task-id="${taskId}"]`);
+    console.log('updateTaskElementState called:', taskId, completed, listItem);
+    
+    if (!listItem) {
+        console.log('List item not found!');
+        return;
+    }
+    
+    const checkbox = listItem.querySelector('input[type="checkbox"]');
+    const taskText = listItem.querySelector('.task-text');
+    
+    if (taskText) {
+        if (completed) {
+            console.log('Task completed - applying fade-out animation');
+            // Apply strike-through and fade animation
+            taskText.style.textDecoration = 'line-through';
+            taskText.style.opacity = '0.6';
+            listItem.classList.add('completed-task');
+            
+            // Fade out the task
+            setTimeout(() => {
+                console.log('Starting fade-out animation');
+                listItem.style.transition = 'all 0.6s ease';
+                listItem.style.opacity = '0';
+                listItem.style.transform = 'translateX(-30px) scale(0.9)';
+                
+                // After animation, re-render to hide completed tasks (unless toggle is on)
+                setTimeout(() => {
+                    console.log('Re-rendering tasks to hide completed');
+                    renderTasks();
+                }, 600);
+            }, 1500);
+        } else {
+            // Unchecked - remove completion styling
+            listItem.classList.remove('completed-task');
+            listItem.style.transition = '';
+            listItem.style.opacity = '1';
+            listItem.style.transform = '';
+            taskText.style.textDecoration = 'none';
+            taskText.style.opacity = '1';
+        }
+    }
+    
+    // Update task counter
+    updateTaskCounter();
 }
 
 async function editTask(taskId) {
@@ -111,7 +167,23 @@ async function deleteTask(taskId, listItem) {
 
         if (response.ok) {
             allTasks = allTasks.filter(t => t.id !== taskId);
-            renderTasks();
+            
+            // Smooth fade-out animation before removing
+            const taskElement = document.querySelector(`li[data-task-id="${taskId}"]`);
+            if (taskElement) {
+                taskElement.style.transition = 'all 0.3s ease';
+                taskElement.style.opacity = '0';
+                taskElement.style.transform = 'translateX(-20px)';
+                
+                setTimeout(() => {
+                    taskElement.remove();
+                    updateTaskCounter();
+                    updateCategoryFilter();
+                }, 300);
+            } else {
+                updateTaskCounter();
+                updateCategoryFilter();
+            }
         } else {
             alert('Failed to delete task');
         }
@@ -125,6 +197,23 @@ function filterTasks() {
     renderTasks();
 }
 
+// Toggle completed tasks visibility
+function toggleCompletedTasks() {
+    showCompleted = !showCompleted;
+    const toggleBtn = document.getElementById('toggleCompleted');
+    const toggleIcon = document.getElementById('toggleIcon');
+    
+    if (showCompleted) {
+        toggleBtn.innerHTML = '<span id="toggleIcon">✕</span> Hide Completed';
+        toggleBtn.classList.add('active');
+    } else {
+        toggleBtn.innerHTML = '<span id="toggleIcon">✓</span> Show Completed';
+        toggleBtn.classList.remove('active');
+    }
+    
+    renderTasks();
+}
+
 function renderTasks() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const filterCategory = document.getElementById('filterCategory').value;
@@ -132,7 +221,8 @@ function renderTasks() {
     let filteredTasks = allTasks.filter(task => {
         const matchesSearch = task.text.toLowerCase().includes(searchTerm);
         const matchesCategory = filterCategory === 'all' || task.category === filterCategory;
-        return matchesSearch && matchesCategory;
+        const matchesCompletionState = showCompleted || !task.completed; // Hide completed unless toggle is on
+        return matchesSearch && matchesCategory && matchesCompletionState;
     });
 
     const taskList = document.getElementById('taskList');
@@ -249,12 +339,17 @@ function createTaskElement(task) {
     const checkbox = document.createElement('input');
     checkbox.type = "checkbox";
     checkbox.checked = task.completed;
-    checkbox.addEventListener('change', async function () {
-        if (this.checked && task.recurrence && task.recurrence !== 'none') {
-            // Handle recurring task completion
-            await handleRecurringTaskCompletion(task);
+    checkbox.addEventListener('change', function (e) {
+        e.stopPropagation();
+        
+        const isChecked = this.checked;
+        console.log('Checkbox changed:', task.id, 'completed:', isChecked);
+        
+        // Call async function without await to prevent blocking
+        if (isChecked && task.recurrence && task.recurrence !== 'none') {
+            handleRecurringTaskCompletion(task).catch(err => console.error('Error:', err));
         } else {
-            await updateTask(task.id, { completed: this.checked });
+            updateTask(task.id, { completed: isChecked }).catch(err => console.error('Error:', err));
         }
     });
 
@@ -526,11 +621,31 @@ async function handleRecurringTaskCompletion(task) {
             const newTask = await response.json();
             allTasks.push(newTask);
             
-            // Mark the current task as completed
-            await updateTask(task.id, { completed: true });
+            // Mark the current task as completed without re-rendering
+            const taskIndex = allTasks.findIndex(t => t.id === task.id);
+            if (taskIndex !== -1) {
+                allTasks[taskIndex].completed = true;
+            }
+            
+            // Update only the specific task element
+            updateTaskElementState(task.id, true);
+            
+            // Add the new recurring task to the list smoothly
+            const taskList = document.getElementById('taskList');
+            const newListItem = createTaskElement(newTask);
+            newListItem.style.opacity = '0';
+            taskList.appendChild(newListItem);
+            
+            // Fade in animation
+            setTimeout(() => {
+                newListItem.style.transition = 'opacity 0.3s ease';
+                newListItem.style.opacity = '1';
+            }, 10);
             
             // Show notification
-            alert(`Task completed! Next occurrence scheduled for ${formattedNextDate}`);
+            setTimeout(() => {
+                alert(`Task completed! Next occurrence scheduled for ${formattedNextDate}`);
+            }, 350);
         } else {
             alert('Failed to create next occurrence');
         }

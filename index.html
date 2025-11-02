@@ -53,6 +53,9 @@
         <div class="task-counter">
             <span id="taskCounter">0 tasks</span>
         </div>
+        <button id="toggleCompleted" class="toggle-completed-btn" onclick="toggleCompletedTasks()">
+            <span id="toggleIcon">✓</span> Show Completed
+        </button>
         <input type="text" id="searchInput" placeholder="🔍 Search tasks..." onkeyup="filterTasks()">
         <select id="filterCategory" onchange="filterTasks()">
             <option value="all">All Categories</option>
@@ -68,9 +71,6 @@
     <script src="js/auth.js"></script>
     <script src="js/theme.js"></script>
     <script src="js/tasks.js"></script>
-    <script>
-        $('[data-toggle="datepicker"]').datepicker();
-    </script>
 
 </body>
 

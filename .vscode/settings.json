@@ -1,3 +1,14 @@
 {
-  "liveServer.settings.port": 5502
+  "liveServer.settings.port": 5502,
+  "liveServer.settings.wait": 5000,
+  "liveServer.settings.ignoreFiles": [
+    "**/*.js",
+    "**/*.css",
+    "**/*.json",
+    "**/js/**",
+    "**/css/**"
+  ],
+  "liveServer.settings.donotShowInfoMsg": true,
+  "liveServer.settings.donotVerifyTags": true,
+  "liveServer.settings.NoBrowser": false
 }
