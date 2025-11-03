@@ -4,6 +4,12 @@
     box-sizing: border-box;
 }
 
+html {
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
 :root {
     --bg-gradient-start: #0d9488;
     --bg-gradient-end: #14b8a6;
@@ -31,12 +37,19 @@ body.dark-mode {
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+    background-attachment: fixed; /* Keep gradient fixed while scrolling */
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    height: auto; /* Allow body to grow */
+    display: block; /* Changed from flex to allow natural scrolling */
     padding: 20px;
+    padding-bottom: 80px; /* Extra space at bottom for scrolling */
     transition: background 0.3s ease;
+}
+
+/* Container wrapper to center content */
+body > * {
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Header Section */
@@ -778,26 +791,156 @@ input[type="checkbox"]:checked::after {
 }
 
 /* Responsive Design */
-@media (max-width: 600px) {
-    .heading-container:first-child h1 {
-        font-size: 2rem;
+@media (max-width: 768px) {
+    body {
+        padding: 15px 10px;
+        padding-bottom: 100px; /* Extra space for mobile scrolling */
     }
 
-    .heading-container:first-child img {
+    /* Header */
+    .heading-container:first-child {
+        flex-direction: column;
+        gap: 10px;
+        margin: 15px 0 20px 0;
+        padding: 0 10px;
+    }
+
+    .heading-container:first-child h1 {
+        font-size: 1.8rem;
+        text-align: center;
+    }
+
+    .logo-icon {
         width: 50px;
         height: 50px;
+        min-width: 50px;
+        font-size: 30px;
     }
 
+    .theme-toggle {
+        position: static;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .logout-btn {
+        position: static;
+        width: 100%;
+    }
+
+    /* Task Input Form */
     .heading-container:nth-child(2) {
-        padding: 20px;
+        padding: 20px 15px;
+        margin-bottom: 15px;
     }
 
-    input[type="text"] {
+    input[type="text"],
+    textarea,
+    select,
+    .date-input-wrapper,
+    #customCategory {
         min-width: 100%;
+        width: 100%;
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+
+    textarea {
+        min-height: 80px;
     }
 
     button {
         width: 100%;
+        padding: 14px 20px;
+        font-size: 16px;
+    }
+
+    /* Task Controls */
+    .task-controls {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 15px;
+        gap: 10px;
+    }
+
+    .task-counter {
+        text-align: center;
+        font-size: 16px;
+    }
+
+    .toggle-completed-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    #searchInput {
+        width: 100%;
+        min-width: 100%;
+    }
+
+    #filterCategory {
+        width: 100%;
+    }
+
+    /* Task List Items */
+    li {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 15px;
+        gap: 10px;
+    }
+
+    .task-content {
+        width: 100%;
+    }
+
+    .task-text {
+        font-size: 15px;
+    }
+
+    .task-meta {
+        flex-wrap: wrap;
+        font-size: 11px;
+    }
+
+    .task-actions {
+        opacity: 1; /* Always show on mobile */
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .edit-btn, .delete-btn {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    /* Checkbox */
+    input[type="checkbox"] {
+        width: 22px;
+        height: 22px;
+        min-width: 22px;
+        align-self: flex-start;
+        margin-top: 2px;
+    }
+}
+
+@media (max-width: 480px) {
+    .heading-container:first-child h1 {
+        font-size: 1.5rem;
+    }
+
+    .logo-icon {
+        width: 45px;
+        height: 45px;
+        min-width: 45px;
+        font-size: 26px;
+    }
+
+    .task-text {
+        font-size: 14px;
+    }
+
+    .task-meta {
+        font-size: 10px;
     }
 }
 

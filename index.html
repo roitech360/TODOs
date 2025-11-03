@@ -4,75 +4,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>To-Do</title>
+    <title>To-Do List - Welcome</title>
     <link rel="stylesheet" href="css/style.css">
-    <script
-    src="https://code.jquery.com/jquery-3.7.1.slim.min.js"
-    integrity="sha256-kmHvs0B+OpCW5GVHUNjv9rOmY0IvSIRcf7zGUDTDQM8="
-    crossorigin="anonymous"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.js"></script>
+    <style>
+        .landing-container {
+            text-align: center;
+            max-width: 600px;
+            margin: 100px auto;
+            background: var(--card-bg);
+            padding: 50px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .landing-container .logo-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 20px;
+            font-size: 48px;
+        }
+
+        .landing-container h1 {
+            color: var(--text-color);
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .landing-container p {
+            color: var(--text-light);
+            font-size: 1.2rem;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .landing-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .landing-actions button {
+            min-width: 180px;
+            padding: 15px 35px;
+            font-size: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .landing-container {
+                margin: 50px 20px;
+                padding: 40px 25px;
+            }
+
+            .landing-container h1 {
+                font-size: 2rem;
+            }
+
+            .landing-container p {
+                font-size: 1rem;
+            }
+
+            .landing-actions {
+                flex-direction: column;
+            }
+
+            .landing-actions button {
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <div class="heading-container">
+    <div class="landing-container">
         <div class="logo-icon">✓</div>
-        <h1>To-Do List</h1>
-        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
-        <button class="logout-btn" onclick="logout()">Logout</button>
-    </div>
-    
-    <div class="heading-container">
-        <input type="text" id="taskInput" placeholder="What needs to be done?">
-        <textarea id="taskNotes" placeholder="Add notes or description (optional)" rows="2"></textarea>
-        <div class="date-input-wrapper">
-            <span class="date-icon">📅</span>
-            <input type="date" id="date" placeholder="Due date"/>
+        <h1>Welcome to To-Do List</h1>
+        <p>Organize your tasks, boost your productivity, and achieve your goals with our simple and powerful task management app.</p>
+        
+        <div class="landing-actions">
+            <button onclick="window.location.href='login.html'">Get Started</button>
+            <button onclick="toggleTheme()" style="background: rgba(13, 148, 136, 0.2); color: var(--text-color);">Toggle Theme 🌙</button>
         </div>
-        <select id="priority">
-            <option value="low">🟢 Low Priority</option>
-            <option value="medium" selected>🟡 Medium Priority</option>
-            <option value="high">🔴 High Priority</option>
-        </select>
-        <select id="category">
-            <option value="personal">💭 Personal</option>
-            <option value="work">💼 Work</option>
-            <option value="urgent">⚠️ Urgent</option>
-            <option value="custom">✏️ Custom...</option>
-        </select>
-        <input type="text" id="customCategory" placeholder="Enter custom category" style="display: none;">
-        <select id="recurrence">
-            <option value="none">No Repeat</option>
-            <option value="daily">🔄 Daily</option>
-            <option value="weekly">📅 Weekly</option>
-            <option value="monthly">📆 Monthly</option>
-        </select>
-        <button onclick="addTask()">Add</button>
     </div>
 
-    <div class="task-controls">
-        <div class="task-counter">
-            <span id="taskCounter">0 tasks</span>
-        </div>
-        <button id="toggleCompleted" class="toggle-completed-btn" onclick="toggleCompletedTasks()">
-            <span id="toggleIcon">✓</span> Show Completed
-        </button>
-        <input type="text" id="searchInput" placeholder="🔍 Search tasks..." onkeyup="filterTasks()">
-        <select id="filterCategory" onchange="filterTasks()">
-            <option value="all">All Categories</option>
-            <option value="personal">Personal</option>
-            <option value="work">Work</option>
-            <option value="urgent">Urgent</option>
-        </select>
-    </div>
-
-    <ul id="taskList">
-    </ul>
-
-    <script src="js/config.js"></script>
-    <script src="js/auth.js"></script>
     <script src="js/theme.js"></script>
-    <script src="js/tasks.js"></script>
-
+    <script>
+        // Check if already logged in, redirect to tasks
+        if (localStorage.getItem('authToken')) {
+            window.location.href = 'tasks.html';
+        }
+    </script>
 </body>
 
 </html>

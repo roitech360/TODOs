@@ -1,6 +1,6 @@
 // Check if already logged in
 if (localStorage.getItem('authToken')) {
-    window.location.href = 'index.html';
+    window.location.href = 'tasks.html';
 }
 
 // API_URL is loaded from config.js
@@ -25,8 +25,8 @@ async function signup() {
         return;
     }
 
-    if (password.length < 7) {
-        alert('Password must be at least 7 characters long');
+    if (password.length < 6) {
+        alert('Password must be at least 6 characters long');
         return;
     }
 
@@ -85,7 +85,7 @@ async function login() {
         if (response.ok) {
             localStorage.setItem('authToken', data.token);
             localStorage.setItem('currentUser', data.username);
-            window.location.href = 'index.html';
+            window.location.href = 'tasks.html';
         } else {
             alert(data.error || 'Login failed');
         }
