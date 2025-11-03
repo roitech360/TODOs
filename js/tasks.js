@@ -100,10 +100,8 @@ async function updateTask(taskId, updates) {
 
 function updateTaskElementState(taskId, completed) {
     const listItem = document.querySelector(`li[data-task-id="${taskId}"]`);
-    console.log('updateTaskElementState called:', taskId, completed, listItem);
     
     if (!listItem) {
-        console.log('List item not found!');
         return;
     }
     
@@ -112,7 +110,6 @@ function updateTaskElementState(taskId, completed) {
     
     if (taskText) {
         if (completed) {
-            console.log('Task completed - applying fade-out animation');
             // Apply strike-through and fade animation
             taskText.style.textDecoration = 'line-through';
             taskText.style.opacity = '0.6';
@@ -120,14 +117,12 @@ function updateTaskElementState(taskId, completed) {
             
             // Fade out the task
             setTimeout(() => {
-                console.log('Starting fade-out animation');
                 listItem.style.transition = 'all 0.6s ease';
                 listItem.style.opacity = '0';
                 listItem.style.transform = 'translateX(-30px) scale(0.9)';
                 
                 // After animation, re-render to hide completed tasks (unless toggle is on)
                 setTimeout(() => {
-                    console.log('Re-rendering tasks to hide completed');
                     renderTasks();
                 }, 600);
             }, 1500);
@@ -343,7 +338,6 @@ function createTaskElement(task) {
         e.stopPropagation();
         
         const isChecked = this.checked;
-        console.log('Checkbox changed:', task.id, 'completed:', isChecked);
         
         // Call async function without await to prevent blocking
         if (isChecked && task.recurrence && task.recurrence !== 'none') {

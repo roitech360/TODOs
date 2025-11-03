@@ -4,6 +4,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
 
 const app = express();
@@ -13,7 +15,25 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ?
     process.env.ALLOWED_ORIGINS.split(',') : 
     ['http://localhost:5502', 'http://127.0.0.1:5502'];
 
-// Middleware
+// Security Middleware
+app.use(helmet());
+
+// Rate limiting - prevent brute force attacks
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // limit each IP to 100 requests per windowMs
+    message: 'Too many requests from this IP, please try again later.'
+});
+app.use(limiter);
+
+// Stricter rate limit for authentication endpoints
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5, // limit each IP to 5 login attempts per 15 minutes
+    message: 'Too many login attempts, please try again later.'
+});
+
+// CORS Middleware
 app.use(cors({
     origin: function(origin, callback) {
         // Allow requests with no origin (like mobile apps or curl requests)
@@ -71,7 +91,7 @@ const authenticateToken = (req, res, next) => {
 // ========== AUTHENTICATION ROUTES ==========
 
 // Signup route
-app.post('/api/signup', async (req, res) => {
+app.post('/api/signup', authLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
 
@@ -101,7 +121,7 @@ app.post('/api/signup', async (req, res) => {
 });
 
 // Login route
-app.post('/api/login', async (req, res) => {
+app.post('/api/login', authLimiter, async (req, res) => {
     try {
         const { username, password } = req.body;
 
