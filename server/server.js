@@ -4,13 +4,28 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config();
 
 const app = express();
-const PORT = 3000;
-const SECRET_KEY = 'your-secret-key-change-this-in-production';
+const PORT = process.env.PORT || 3000;
+const SECRET_KEY = process.env.SECRET_KEY || 'your-secret-key-change-this-in-production';
+const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS ? 
+    process.env.ALLOWED_ORIGINS.split(',') : 
+    ['http://localhost:5502', 'http://127.0.0.1:5502'];
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin) return callback(null, true);
+        
+        if (ALLOWED_ORIGINS.indexOf(origin) === -1) {
+            return callback(new Error('Not allowed by CORS'), false);
+        }
+        return callback(null, true);
+    },
+    credentials: true
+}));
 app.use(express.json());
 
 // Data file paths

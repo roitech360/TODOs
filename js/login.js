@@ -3,7 +3,7 @@ if (localStorage.getItem('authToken')) {
     window.location.href = 'index.html';
 }
 
-const API_URL = 'http://localhost:3000/api';
+// API_URL is loaded from config.js
 
 function showSignup() {
     document.getElementById('loginForm').classList.add('hidden');
@@ -25,8 +25,8 @@ async function signup() {
         return;
     }
 
-    if (password.length < 4) {
-        alert('Password must be at least 4 characters long');
+    if (password.length < 7) {
+        alert('Password must be at least 7 characters long');
         return;
     }
 

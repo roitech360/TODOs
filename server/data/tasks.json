@@ -21,20 +21,24 @@
   ],
   "leroitorres_": [
     {
-      "id": 1762066006859,
-      "text": "code ",
-      "date": "2025-11-02",
+      "id": 1762147343491,
+      "text": "code",
+      "date": null,
       "completed": true,
       "priority": "medium",
-      "category": "work"
+      "category": "personal",
+      "notes": null,
+      "recurrence": "none"
     },
     {
-      "id": 1762065986065,
-      "text": "gym",
-      "date": "2025-11-02",
+      "id": 1762147348368,
+      "text": "pray",
+      "date": null,
       "completed": true,
-      "priority": "high",
-      "category": "personal"
+      "priority": "medium",
+      "category": "personal",
+      "notes": null,
+      "recurrence": "none"
     }
   ],
   "milka": [

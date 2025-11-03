@@ -1,5 +1,5 @@
 // Task management functions - Updated Nov 3, 2025
-const API_URL = 'http://localhost:3000/api';
+// API_URL is loaded from config.js
 let allTasks = [];
 let showCompleted = false; // Toggle state for showing/hiding completed tasks
 
