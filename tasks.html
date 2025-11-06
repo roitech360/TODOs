@@ -9,14 +9,17 @@
 </head>
 
 <body>
-    <div class="heading-container">
+    <!-- Fixed Position Buttons -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+
+    <!-- Header -->
+    <div class="heading-container header-title">
         <div class="logo-icon">✓</div>
         <h1>To-Do List</h1>
-        <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
-        <button class="logout-btn" onclick="logout()">Logout</button>
     </div>
     
-    <div class="heading-container">
+    <div class="heading-container task-input-container">
         <input type="text" id="taskInput" placeholder="What needs to be done?">
         <textarea id="taskNotes" placeholder="Add notes or description (optional)" rows="2"></textarea>
         <div class="date-input-wrapper">

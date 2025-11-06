@@ -53,19 +53,18 @@ body > * {
 }
 
 /* Header Section */
-.heading-container:first-child {
+.heading-container.header-title {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 15px;
-    margin: 30px 0 40px 0;
+    margin: 30px auto 40px auto;
     animation: fadeInDown 0.6s ease;
-    position: relative;
     width: 100%;
     max-width: 700px;
 }
 
-.heading-container:first-child h1 {
+.heading-container.header-title h1 {
     color: white;
     font-size: 2.5rem;
     font-weight: 600;
@@ -89,8 +88,9 @@ body > * {
 }
 
 .theme-toggle {
-    position: absolute;
-    right: 100px;
+    position: fixed;
+    top: 20px;
+    left: 20px;
     padding: 10px 20px !important;
     font-size: 20px !important;
     background: rgba(255, 255, 255, 0.2) !important;
@@ -98,6 +98,7 @@ body > * {
     border: 2px solid white !important;
     color: white !important;
     cursor: pointer;
+    z-index: 1000;
 }
 
 .theme-toggle:hover {
@@ -114,18 +115,20 @@ body > * {
 }
 
 .logout-btn {
-    position: absolute;
-    right: 0;
+    position: fixed;
+    top: 20px;
+    right: 20px;
     padding: 10px 20px !important;
     font-size: 14px !important;
     background: rgba(255, 255, 255, 0.2) !important;
     backdrop-filter: blur(10px);
     border: 2px solid white !important;
     color: white !important;
+    z-index: 1000;
 }
 
 /* Input Container */
-.heading-container:nth-child(2) {
+.heading-container.task-input-container {
     background: var(--card-bg);
     padding: 25px;
     border-radius: 15px;
@@ -798,14 +801,14 @@ input[type="checkbox"]:checked::after {
     }
 
     /* Header */
-    .heading-container:first-child {
+    .heading-container.header-title {
         flex-direction: column;
         gap: 10px;
         margin: 15px 0 20px 0;
         padding: 0 10px;
     }
 
-    .heading-container:first-child h1 {
+    .heading-container.header-title h1 {
         font-size: 1.8rem;
         text-align: center;
     }
@@ -818,18 +821,25 @@ input[type="checkbox"]:checked::after {
     }
 
     .theme-toggle {
-        position: static;
-        width: 100%;
-        margin-top: 10px;
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        width: auto;
+        padding: 8px 16px !important;
+        font-size: 18px !important;
     }
 
     .logout-btn {
-        position: static;
-        width: 100%;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: auto;
+        padding: 8px 16px !important;
+        font-size: 13px !important;
     }
 
     /* Task Input Form */
-    .heading-container:nth-child(2) {
+    .heading-container.task-input-container {
         padding: 20px 15px;
         margin-bottom: 15px;
     }
@@ -924,7 +934,7 @@ input[type="checkbox"]:checked::after {
 }
 
 @media (max-width: 480px) {
-    .heading-container:first-child h1 {
+    .heading-container.header-title h1 {
         font-size: 1.5rem;
     }
 
