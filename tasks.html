@@ -66,6 +66,39 @@
     <ul id="taskList">
     </ul>
 
+    <!-- Edit Task Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeEditModal()">&times;</span>
+            <h2>Edit Task</h2>
+            <form id="editTaskForm" onsubmit="saveEditedTask(event)">
+                <input type="text" id="editTaskText" placeholder="Task name" required>
+                <textarea id="editTaskNotes" placeholder="Notes (optional)" rows="3"></textarea>
+                <input type="date" id="editTaskDate">
+                <select id="editTaskPriority">
+                    <option value="low">🟢 Low Priority</option>
+                    <option value="medium">🟡 Medium Priority</option>
+                    <option value="high">🔴 High Priority</option>
+                </select>
+                <select id="editTaskCategory">
+                    <option value="personal">💭 Personal</option>
+                    <option value="work">💼 Work</option>
+                    <option value="urgent">⚠️ Urgent</option>
+                </select>
+                <select id="editTaskRecurrence">
+                    <option value="none">No Repeat</option>
+                    <option value="daily">🔄 Daily</option>
+                    <option value="weekly">📅 Weekly</option>
+                    <option value="monthly">📆 Monthly</option>
+                </select>
+                <div class="modal-buttons">
+                    <button type="submit" class="save-btn">Save Changes</button>
+                    <button type="button" class="cancel-btn" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="js/config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/theme.js"></script>

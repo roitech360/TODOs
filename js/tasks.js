@@ -141,14 +141,48 @@ function updateTaskElementState(taskId, completed) {
     updateTaskCounter();
 }
 
+let currentEditingTaskId = null;
+
 async function editTask(taskId) {
     const task = allTasks.find(t => t.id === taskId);
     if (!task) return;
 
-    const newText = prompt('Edit task:', task.text);
-    if (newText && newText.trim() !== '' && newText !== task.text) {
-        await updateTask(taskId, { text: newText });
-    }
+    // Store the task ID being edited
+    currentEditingTaskId = taskId;
+
+    // Populate the modal form with current task data
+    document.getElementById('editTaskText').value = task.text;
+    document.getElementById('editTaskNotes').value = task.notes || '';
+    document.getElementById('editTaskDate').value = task.date || '';
+    document.getElementById('editTaskPriority').value = task.priority || 'medium';
+    document.getElementById('editTaskCategory').value = task.category || 'personal';
+    document.getElementById('editTaskRecurrence').value = task.recurrence || 'none';
+
+    // Show the modal
+    document.getElementById('editModal').classList.add('active');
+}
+
+function closeEditModal() {
+    document.getElementById('editModal').classList.remove('active');
+    currentEditingTaskId = null;
+}
+
+async function saveEditedTask(event) {
+    event.preventDefault();
+
+    if (!currentEditingTaskId) return;
+
+    const updates = {
+        text: document.getElementById('editTaskText').value.trim(),
+        notes: document.getElementById('editTaskNotes').value.trim() || null,
+        date: document.getElementById('editTaskDate').value || null,
+        priority: document.getElementById('editTaskPriority').value,
+        category: document.getElementById('editTaskCategory').value,
+        recurrence: document.getElementById('editTaskRecurrence').value
+    };
+
+    await updateTask(currentEditingTaskId, updates);
+    closeEditModal();
 }
 
 async function deleteTask(taskId, listItem) {
@@ -270,9 +304,10 @@ function updateCategoryFilter() {
     }
 }
 
-document.addEventListener('DOMContentLoaded', loadTasks);
-
 document.addEventListener('DOMContentLoaded', function() {
+    // Load tasks when page loads
+    loadTasks();
+    
     // Handle category dropdown change
     const categorySelect = document.getElementById('category');
     const customCategoryInput = document.getElementById('customCategory');
@@ -284,6 +319,14 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             customCategoryInput.style.display = 'none';
             customCategoryInput.value = '';
+        }
+    });
+
+    // Close modal when clicking outside
+    const modal = document.getElementById('editModal');
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeEditModal();
         }
     });
 });
