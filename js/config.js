@@ -9,8 +9,8 @@ const getApiUrl = () => {
         return 'http://localhost:3000/api';
     }
     
-    // Production URL - UPDATE THIS when you deploy your backend
-    return 'https://your-backend-url.com/api';
+    // Production - Cloudflare Workers backend
+    return 'https://todo-backend.leroi-torres2805.workers.dev/api';
 };
 
 const API_URL = getApiUrl();
