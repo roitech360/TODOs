@@ -20,6 +20,7 @@ async function adminLogin() {
     }
 
     try {
+        console.log('Attempting admin login for username:', username);
         const response = await fetch(`${API_BASE_URL}/admin/login`, {
             method: 'POST',
             headers: {
@@ -35,11 +36,17 @@ async function adminLogin() {
             localStorage.setItem('adminUser', data.username);
             window.location.href = 'admin-dashboard.html';
         } else {
-            alert(data.error || 'Login failed');
+            if (data.error === 'Invalid credentials') {
+                alert('Invalid username or password. If you haven\'t created an admin account yet, click "Create Admin" below.');
+            } else if (data.error === 'Access denied - Admin only') {
+                alert('This account is not an admin account. Please use an admin account or create one.');
+            } else {
+                alert(data.error || 'Login failed');
+            }
         }
     } catch (error) {
         console.error('Login error:', error);
-        alert('Login failed. Please try again.');
+        alert('Login failed. Please try again. Error: ' + error.message);
     }
 }
 
@@ -66,6 +73,7 @@ async function adminSignup() {
     }
 
     try {
+        console.log('Attempting admin signup with:', { username, adminKey: '***' });
         const response = await fetch(`${API_BASE_URL}/admin/signup`, {
             method: 'POST',
             headers: {
