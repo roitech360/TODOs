@@ -14,8 +14,9 @@ const getApiUrl = () => {
 };
 
 const API_URL = getApiUrl();
+const API_BASE_URL = API_URL; // Alias for compatibility
 
 // Export for use in other files
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { API_URL };
+    module.exports = { API_URL, API_BASE_URL };
 }
