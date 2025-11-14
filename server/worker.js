@@ -59,7 +59,7 @@ export default {
         }
 
         const hashedPassword = await bcryptjs.hash(password, 10);
-        await env.USERS.put(username, JSON.stringify({ password: hashedPassword }));
+        await env.USERS.put(username, JSON.stringify({ password: hashedPassword, isAdmin: false }));
 
         return new Response(JSON.stringify({ message: 'User created successfully' }), {
           status: 201,
@@ -244,6 +244,247 @@ export default {
         await env.TASKS.put(user.username, JSON.stringify(reorderedTasks));
 
         return new Response(JSON.stringify({ message: 'Task order updated successfully' }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // ==== ADMIN ROUTES ====
+
+      // Admin Signup
+      if (path === '/api/admin/signup' && request.method === 'POST') {
+        const { username, password, adminKey } = await request.json();
+        
+        // Secret admin key - change this to your own secret
+        const ADMIN_SECRET_KEY = env.ADMIN_SECRET_KEY || 'admin-secret-2024';
+        
+        if (adminKey !== ADMIN_SECRET_KEY) {
+          return new Response(JSON.stringify({ error: 'Invalid admin key' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        if (!username || !password || password.length < 6) {
+          return new Response(JSON.stringify({ error: 'Invalid input' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const existingUser = await env.USERS.get(username);
+        if (existingUser) {
+          return new Response(JSON.stringify({ error: 'Username already exists' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const hashedPassword = await bcryptjs.hash(password, 10);
+        await env.USERS.put(username, JSON.stringify({ password: hashedPassword, isAdmin: true }));
+
+        return new Response(JSON.stringify({ message: 'Admin account created successfully' }), {
+          status: 201,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Admin Login
+      if (path === '/api/admin/login' && request.method === 'POST') {
+        const { username, password } = await request.json();
+        
+        const userDataRaw = await env.USERS.get(username);
+        if (!userDataRaw) {
+          return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const userData = JSON.parse(userDataRaw);
+        
+        // Check if user is admin
+        if (!userData.isAdmin) {
+          return new Response(JSON.stringify({ error: 'Access denied - Admin only' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const validPassword = await bcryptjs.compare(password, userData.password);
+        
+        if (!validPassword) {
+          return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const token = generateToken(username + '_admin', SECRET_KEY);
+        return new Response(JSON.stringify({ token, username }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Admin Dashboard - Get all users and statistics
+      if (path === '/api/admin/dashboard' && request.method === 'GET') {
+        const authHeader = request.headers.get('Authorization');
+        const token = authHeader?.split(' ')[1];
+        const user = verifyToken(token, SECRET_KEY);
+        
+        if (!user) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Verify admin status
+        const adminUsername = user.username.replace('_admin', '');
+        const adminDataRaw = await env.USERS.get(adminUsername);
+        if (!adminDataRaw) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const adminData = JSON.parse(adminDataRaw);
+        if (!adminData.isAdmin) {
+          return new Response(JSON.stringify({ error: 'Access denied - Admin only' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Get all users
+        const usersList = await env.USERS.list();
+        const users = [];
+        let totalTasks = 0;
+        let completedTasks = 0;
+        let activeTasks = 0;
+
+        for (const key of usersList.keys) {
+          const username = key.name;
+          const userDataRaw = await env.USERS.get(username);
+          const userData = JSON.parse(userDataRaw);
+          
+          // Skip if this is an admin viewing themselves
+          const tasksRaw = await env.TASKS.get(username);
+          const tasks = tasksRaw ? JSON.parse(tasksRaw) : [];
+          
+          const userCompletedTasks = tasks.filter(t => t.completed).length;
+          const userActiveTasks = tasks.filter(t => !t.completed).length;
+          
+          totalTasks += tasks.length;
+          completedTasks += userCompletedTasks;
+          activeTasks += userActiveTasks;
+
+          users.push({
+            username,
+            isAdmin: userData.isAdmin || false,
+            taskCount: tasks.length
+          });
+        }
+
+        return new Response(JSON.stringify({
+          stats: {
+            totalUsers: users.length,
+            totalTasks,
+            completedTasks,
+            activeTasks
+          },
+          users: users.sort((a, b) => b.taskCount - a.taskCount)
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Admin - Get specific user's tasks
+      if (path.startsWith('/api/admin/user/') && path.endsWith('/tasks') && request.method === 'GET') {
+        const authHeader = request.headers.get('Authorization');
+        const token = authHeader?.split(' ')[1];
+        const user = verifyToken(token, SECRET_KEY);
+        
+        if (!user) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Verify admin status
+        const adminUsername = user.username.replace('_admin', '');
+        const adminDataRaw = await env.USERS.get(adminUsername);
+        if (!adminDataRaw) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const adminData = JSON.parse(adminDataRaw);
+        if (!adminData.isAdmin) {
+          return new Response(JSON.stringify({ error: 'Access denied - Admin only' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const targetUsername = path.split('/')[3];
+        const tasksRaw = await env.TASKS.get(targetUsername);
+        const tasks = tasksRaw ? JSON.parse(tasksRaw) : [];
+
+        return new Response(JSON.stringify({ tasks }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      // Admin - Delete user
+      if (path.startsWith('/api/admin/user/') && !path.endsWith('/tasks') && request.method === 'DELETE') {
+        const authHeader = request.headers.get('Authorization');
+        const token = authHeader?.split(' ')[1];
+        const user = verifyToken(token, SECRET_KEY);
+        
+        if (!user) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Verify admin status
+        const adminUsername = user.username.replace('_admin', '');
+        const adminDataRaw = await env.USERS.get(adminUsername);
+        if (!adminDataRaw) {
+          return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+            status: 401,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const adminData = JSON.parse(adminDataRaw);
+        if (!adminData.isAdmin) {
+          return new Response(JSON.stringify({ error: 'Access denied - Admin only' }), {
+            status: 403,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const targetUsername = path.split('/')[3];
+        
+        // Prevent deleting yourself
+        if (targetUsername === adminUsername) {
+          return new Response(JSON.stringify({ error: 'Cannot delete your own account' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Delete user and their tasks
+        await env.USERS.delete(targetUsername);
+        await env.TASKS.delete(targetUsername);
+
+        return new Response(JSON.stringify({ message: 'User deleted successfully' }), {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
