@@ -4,8 +4,11 @@ node_modules/
 # Environment variables
 .env
 
-# Data files (contains user data)
-server/data/
+# Old folders (deprecated)
+server/
+.venv/
+.wrangler/
+.cloudflare-static
 
 # OS files
 .DS_Store
