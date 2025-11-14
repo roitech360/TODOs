@@ -1,0 +1,5 @@
+name = "todo-app"
+pages_build_output_dir = "."
+
+[env.production]
+routes = []
