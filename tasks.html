@@ -27,7 +27,7 @@
         .user-avatar {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, #0d9488, #14b8a6);
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -35,6 +35,10 @@
             color: white;
             font-weight: bold;
             font-size: 18px;
+        }
+
+        .header h2 {
+            color: var(--text-color);
         }
 
         .task-input-section {
@@ -48,10 +52,12 @@
         .task-input {
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
 
-        .task-input input {
+        .task-input input[type="text"] {
             flex: 1;
+            min-width: 200px;
             padding: 15px;
             border: 2px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
@@ -60,15 +66,30 @@
             font-size: 16px;
         }
 
+        .task-input input[type="date"] {
+            padding: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-color);
+            font-size: 16px;
+            cursor: pointer;
+        }
+
         .task-input button {
             padding: 15px 30px;
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(135deg, #0d9488, #14b8a6);
             border: none;
             border-radius: 10px;
             color: white;
             cursor: pointer;
             font-weight: 600;
             transition: transform 0.2s;
+        }
+
+        .task-input-section h3,
+        .tasks-container h3 {
+            color: var(--text-color);
         }
 
         .task-input button:hover {
@@ -115,6 +136,24 @@
             opacity: 0.5;
         }
 
+        .task-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .task-date {
+            font-size: 13px;
+            color: var(--text-color);
+            opacity: 0.7;
+            padding: 4px 8px;
+            background: rgba(13, 148, 136, 0.1);
+            border-radius: 4px;
+            display: inline-block;
+            width: fit-content;
+        }
+
         .task-actions {
             display: flex;
             gap: 10px;
@@ -159,6 +198,15 @@
 
         .container {
             margin-top: 80px;
+        }
+
+        /* Improve date input visibility */
+        .task-input input[type="date"] {
+            color-scheme: light;
+        }
+
+        body.dark-mode .task-input input[type="date"] {
+            color-scheme: dark;
         }
 
         .stats {
@@ -209,7 +257,8 @@
             <h3 style="color: var(--text-color); margin-bottom: 15px;">Add New Task</h3>
             <div class="task-input">
                 <input type="text" id="taskInput" placeholder="What needs to be done?" />
-                <button onclick="addTask()">Add Task</button>
+                <input type="date" id="taskDate" />
+                <button id="addTaskBtn">Add Task</button>
             </div>
         </div>
 

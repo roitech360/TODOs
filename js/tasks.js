@@ -55,16 +55,17 @@ function renderTasks() {
     tasksList.innerHTML = tasks.map(task => `
         <div class="task-item">
             <input type="checkbox" class="task-checkbox" ${task.completed ? 'checked' : ''} 
-                    onchange="toggleTask('${task.id}', this.checked)">
-            <span class="task-text ${task.completed ? 'completed' : ''}">${escapeHtml(task.text)}</span>
+                   onchange="toggleTask('${task.id}', this.checked)">
+            <div class="task-content">
+                <span class="task-text ${task.completed ? 'completed' : ''}">${escapeHtml(task.text)}</span>
+                ${task.date ? `<div class="task-date">📅 ${formatDate(task.date)}</div>` : ''}
+            </div>
             <div class="task-actions">
                 <button class="edit-btn" onclick="editTask('${task.id}')">Edit</button>
                 <button class="delete-btn" onclick="deleteTask('${task.id}')">Delete</button>
             </div>
         </div>
-    `).join('');
-
-    // Update stats
+    `).join('');    // Update stats
     const completed = tasks.filter(t => t.completed).length;
     const pending = tasks.length - completed;
     
@@ -76,7 +77,11 @@ function renderTasks() {
 
 async function addTask() {
     const taskInput = document.getElementById('taskInput');
+    const taskDate = document.getElementById('taskDate');
     const taskText = taskInput.value.trim();
+    const date = taskDate ? taskDate.value : null;
+
+    console.log('Adding task:', taskText, 'with date:', date);
 
     if (!taskText) {
         alert('Please enter a task');
@@ -90,17 +95,26 @@ async function addTask() {
                 'Authorization': `Bearer ${authToken}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ text: taskText })
+            body: JSON.stringify({ text: taskText, date: date || null })
         });
+
+        console.log('Response status:', response.status);
 
         if (response.ok) {
             taskInput.value = '';
+            // Reset to today's date after adding task
+            if (taskDate) {
+                const today = new Date().toISOString().split('T')[0];
+                taskDate.value = today;
+            }
             await loadTasks();
+            console.log('Task added successfully');
         } else if (response.status === 401) {
             alert('Session expired. Please login again.');
             logout();
         } else {
             const data = await response.json();
+            console.error('Failed to add task:', data);
             alert(data.error || 'Failed to add task');
         }
     } catch (error) {
@@ -206,3 +220,31 @@ function escapeHtml(text) {
     div.textContent = text;
     return div.innerHTML;
 }
+
+// Format date for display
+function formatDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Make functions globally accessible for HTML onclick attributes
+window.addTask = addTask;
+window.toggleTask = toggleTask;
+window.editTask = editTask;
+window.deleteTask = deleteTask;
+
+// Also add event listener for add task button
+document.addEventListener('DOMContentLoaded', function() {
+    const addTaskBtn = document.getElementById('addTaskBtn');
+    if (addTaskBtn) {
+        addTaskBtn.addEventListener('click', addTask);
+    }
+    
+    // Set today's date
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('taskDate');
+    if (dateInput) {
+        dateInput.value = today;
+    }
+});
