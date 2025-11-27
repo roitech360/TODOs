@@ -12,5 +12,5 @@ id = "394bf65860754fde84903d965dca9276"
 
 [vars]
 SECRET_KEY = "your-secret-key-change-this"
-ALLOWED_ORIGINS = "https://todo-app.pages.dev,http://localhost:5502"
+ALLOWED_ORIGINS = "https://todo-app-30j.pages.dev,https://*.todo-app-30j.pages.dev,http://localhost:5502"
 ADMIN_SECRET_KEY = "admin-secret-2024"
